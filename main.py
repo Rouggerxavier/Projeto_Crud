@@ -1,12 +1,15 @@
 from CRUD_clientes import CrudCliente
 from CRUD_produtos import CrudProduto
-from CRUD_vendas import CrudVendas
+from crud_compra import CrudCompra
+from CRUD_vendedor import CrudVendedor
+
 
 def menu_principal():
     print("\n===== SISTEMA DO BAR =====")
     print("1. Gerenciar clientes")
     print("2. Gerenciar produtos")
-    print("3. Gerenciar vendas")
+    print("3. Gerenciar vendedores")
+    print("4. Gerenciar compras")
     print("0. Sair")
 
 def menu_clientes():
@@ -18,41 +21,42 @@ def menu_clientes():
         print("3. Pesquisar cliente por nome")
         print("4. Remover cliente")
         print("5. Listar todos os clientes")
-        print("6. Exibir um cliente pelo ID")
-        print("7. Gerar relatório de clientes")
-        print("0. Voltar ao menu principal")
-        opcao = input("Escolha uma opção: ")
+        print("6. Exibir cliente pelo ID")
+        print("7. Relatório de clientes")
+        print("0. Voltar")
+        opcao = input("Escolha: ")
 
         if opcao == "1":
             nome = input("Nome: ")
             telefone = input("Telefone: ")
             email = input("Email: ")
             idade = int(input("Idade: "))
-            crud.inserir(nome, telefone, email, idade)
+            cidade = input("Cidade: ")
+            torce = input("Torce Flamengo? (s/n): ").lower() == "s"
+            assiste = input("Assiste One Piece? (s/n): ").lower() == "s"
+            crud.inserir(nome, telefone, email, idade, cidade, torce, assiste)
         elif opcao == "2":
-            id_cliente = int(input("ID do cliente a alterar: "))
+            id_cliente = int(input("ID do cliente: "))
             nome = input("Novo nome: ")
             telefone = input("Novo telefone: ")
             email = input("Novo email: ")
             idade = int(input("Nova idade: "))
-            crud.alterar(id_cliente, nome, telefone, email, idade)
+            cidade = input("Nova cidade: ")
+            torce = input("Torce Flamengo? (s/n): ").lower() == "s"
+            assiste = input("Assiste One Piece? (s/n): ").lower() == "s"
+            crud.alterar(id_cliente, nome, telefone, email, idade, cidade, torce, assiste)
         elif opcao == "3":
-            nome = input("Nome do cliente a pesquisar: ")
-            crud.pesquisar_por_nome(nome)
+            crud.pesquisar_por_nome(input("Nome a pesquisar: "))
         elif opcao == "4":
-            id_cliente = int(input("ID do cliente a remover: "))
-            crud.remover(id_cliente)
+            crud.remover(int(input("ID do cliente: ")))
         elif opcao == "5":
             crud.listar_todos()
         elif opcao == "6":
-            id_cliente = int(input("ID do cliente a exibir: "))
-            crud.exibir_um(id_cliente)
+            crud.exibir_um(int(input("ID do cliente: ")))
         elif opcao == "7":
             crud.relatorio()
         elif opcao == "0":
             break
-        else:
-            print("Opção inválida!")
 
 def menu_produtos():
     crud = CrudProduto()
@@ -63,99 +67,121 @@ def menu_produtos():
         print("3. Pesquisar produto por nome")
         print("4. Remover produto")
         print("5. Listar todos os produtos")
-        print("6. Exibir um produto pelo ID")
-        print("7. Gerar relatório de produtos")
-        print("0. Voltar ao menu principal")
-        opcao = input("Escolha uma opção: ")
+        print("6. Exibir produto pelo ID")
+        print("7. Relatório de produtos")
+        print("0. Voltar")
+        opcao = input("Escolha: ")
 
         if opcao == "1":
             nome = input("Nome do produto: ")
             preco = float(input("Preço: "))
             quantidade = int(input("Quantidade: "))
-            crud.inserir(nome, preco, quantidade)
+            tipo = input("Tipo (bebida/comida): ")
+            origem = input("Origem (cidade): ")
+            crud.inserir(nome, preco, quantidade, tipo, origem)
         elif opcao == "2":
-            id_produto = int(input("ID do produto a alterar: "))
-            nome = input("Novo nome do produto: ")
+            id_produto = int(input("ID do produto: "))
+            nome = input("Novo nome: ")
             preco = float(input("Novo preço: "))
             quantidade = int(input("Nova quantidade: "))
-            crud.alterar(id_produto, nome, preco, quantidade)
+            tipo = input("Tipo (bebida/comida): ")
+            origem = input("Origem (cidade): ")
+            crud.alterar(id_produto, nome, preco, quantidade, tipo, origem)
         elif opcao == "3":
-            nome = input("Nome do produto a pesquisar: ")
-            crud.pesquisar_por_nome(nome)
+            crud.pesquisar_por_nome(input("Nome a pesquisar: "))
         elif opcao == "4":
-            id_produto = int(input("ID do produto a remover: "))
-            crud.remover(id_produto)
+            crud.remover(int(input("ID do produto: ")))
         elif opcao == "5":
             crud.listar_todos()
         elif opcao == "6":
-            id_produto = int(input("ID do produto a exibir: "))
-            crud.exibir_um(id_produto)
+            crud.exibir_um(int(input("ID do produto: ")))
         elif opcao == "7":
             crud.relatorio()
         elif opcao == "0":
             break
-        else:
-            print("Opção inválida!")
 
-def menu_vendas():
-    crud = CrudVendas()
+def menu_vendedores():
+    crud = CrudVendedor()
     while True:
-        print("\n --VENDAS-- ")
-        print("1. Registrar venda")
-        print("2. Alterar venda")
-        print("3. Pesquisar vendas por cliente")
-        print("4. Remover venda")
-        print("5. Listar todas as vendas")
-        print("6. Exibir uma venda pelo ID")
-        print("7. Gerar relatório de vendas")
-        print("0. Voltar ao menu principal")
-        opcao = input("Escolha uma opção: ")
+        print("\n --VENDEDORES-- ")
+        print("1. Inserir vendedor")
+        print("2. Alterar vendedor")
+        print("3. Remover vendedor")
+        print("4. Listar vendedores")
+        print("0. Voltar")
+        opcao = input("Escolha: ")
+
+        if opcao == "1":
+            nome = input("Nome: ")
+            cpf = input("CPF: ")
+            matricula = input("Matrícula: ")
+            email = input("Email: ")
+            telefone = input("Telefone: ")
+            crud.inserir(nome, cpf, matricula, email, telefone)
+        elif opcao == "2":
+            id_v = int(input("ID do vendedor: "))
+            nome = input("Novo nome: ")
+            email = input("Novo email: ")
+            telefone = input("Novo telefone: ")
+            status = input("Status (ativo/inativo/ferias/afastado): ")
+            crud.alterar(id_v, nome, email, telefone, status)
+        elif opcao == "3":
+            crud.remover(int(input("ID do vendedor: ")))
+        elif opcao == "4":
+            crud.listar_todos()
+        elif opcao == "0":
+            break
+
+def menu_compras():
+    crud = CrudCompra()
+    while True:
+        print("\n --COMPRAS-- ")
+        print("1. Nova compra")
+        print("2. Adicionar item à compra")
+        print("3. Finalizar compra")
+        print("4. Listar compras")
+        print("5. Relatório de compras")
+        print("0. Voltar")
+        opcao = input("Escolha: ")
 
         if opcao == "1":
             cliente_id = int(input("ID do cliente: "))
-            produto_id = int(input("ID do produto: "))
-            quantidade = int(input("Quantidade: "))
-            crud.registrar_venda(cliente_id, produto_id, quantidade)
+            vendedor_id = int(input("ID do vendedor: "))
+            crud.nova_compra(cliente_id, vendedor_id)
         elif opcao == "2":
-            id_venda = int(input("ID da venda a alterar: "))
-            cliente_id = int(input("Novo ID do cliente: "))
-            produto_id = int(input("Novo ID do produto: "))
-            quantidade = int(input("Nova quantidade: "))
-            crud.alterar(id_venda, cliente_id, produto_id, quantidade)
+            compra_id = int(input("ID da compra: "))
+            produto_id = int(input("ID do produto: "))
+            qtde = int(input("Quantidade: "))
+            crud.adicionar_item(compra_id, produto_id, qtde)
         elif opcao == "3":
-            cliente_id = int(input("ID do cliente: "))
-            crud.pesquisar_por_cliente(cliente_id)
+            compra_id = int(input("ID da compra: "))
+            forma_id = int(input("ID da forma de pagamento: "))
+            crud.finalizar(compra_id, forma_id)
         elif opcao == "4":
-            id_venda = int(input("ID da venda a remover: "))
-            crud.remover(id_venda)
-        elif opcao == "5":
             crud.listar_todos()
-        elif opcao == "6":
-            id_venda = int(input("ID da venda a exibir: "))
-            crud.exibir_um(id_venda)
-        elif opcao == "7":
+        elif opcao == "5":
             crud.relatorio()
         elif opcao == "0":
             break
-        else:
-            print("Opção inválida!")
 
 def main():
     while True:
         menu_principal()
-        opcao = input("Escolha uma opção: ")
+        opcao = input("Escolha: ")
 
         if opcao == "1":
             menu_clientes()
         elif opcao == "2":
             menu_produtos()
         elif opcao == "3":
-            menu_vendas()
+            menu_vendedores()
+        elif opcao == "4":
+            menu_compras()
         elif opcao == "0":
-            print("Saindo do sistema...")
+            print("Saindo...")
             break
         else:
-            print("Opção inválida!")
+            print("⚠️ Opção inválida!")
 
 if __name__ == "__main__":
     main()

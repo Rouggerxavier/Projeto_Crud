@@ -5,10 +5,13 @@ class CrudCliente:
         self.conn = conectar()
         self.cursor = self.conn.cursor()
 
-    def inserir(self, nome, telefone, email, idade):
+    def inserir(self, nome, telefone, email, idade, cidade, torce_flamengo=False, assiste_one_piece=False):
         try:
-            sql = "INSERT INTO clientes (nome, telefone, email, idade) VALUES (%s, %s, %s, %s)"
-            self.cursor.execute(sql, (nome, telefone, email, idade))
+            sql = """
+                INSERT INTO clientes (nome, telefone, email, idade, cidade, torce_flamengo, assiste_one_piece)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            self.cursor.execute(sql, (nome, telefone, email, idade, cidade, torce_flamengo, assiste_one_piece))
             self.conn.commit()
             print("✅ Cliente inserido com sucesso!")
         except Exception as e:
@@ -16,12 +19,13 @@ class CrudCliente:
 
     def listar_todos(self):
         try:
-            self.cursor.execute("SELECT * FROM clientes ORDER BY id")
+            sql = "SELECT id, nome, telefone, email, idade, cidade, torce_flamengo, assiste_one_piece FROM clientes ORDER BY id"
+            self.cursor.execute(sql)
             clientes = self.cursor.fetchall()
             if clientes:
                 print("\n=== LISTA DE CLIENTES ===")
-                for cliente in clientes:
-                    print(f"ID: {cliente[0]} | Nome: {cliente[1]} | Telefone: {cliente[2]} | Email: {cliente[3]} | Idade: {cliente[5]}")
+                for c in clientes:
+                    print(f"ID: {c[0]} | Nome: {c[1]} | Telefone: {c[2]} | Email: {c[3]} | Idade: {c[4]} | Cidade: {c[5]} | Flamengo: {c[6]} | One Piece: {c[7]}")
             else:
                 print("⚠️ Nenhum cliente cadastrado.")
         except Exception as e:
@@ -29,39 +33,32 @@ class CrudCliente:
 
     def exibir_um(self, id_cliente):
         try:
-            self.cursor.execute("SELECT * FROM clientes WHERE id = %s", (id_cliente,))
-            cliente = self.cursor.fetchone()
-            if cliente:
+            sql = "SELECT id, nome, telefone, email, idade, cidade, torce_flamengo, assiste_one_piece FROM clientes WHERE id = %s"
+            self.cursor.execute(sql, (id_cliente,))
+            c = self.cursor.fetchone()
+            if c:
                 print("\n=== DADOS DO CLIENTE ===")
-                print(f"ID: {cliente[0]}")
-                print(f"Nome: {cliente[1]}")
-                print(f"Telefone: {cliente[2]}")
-                print(f"Email: {cliente[3]}")
-                print(f"Data cadastro: {cliente[4]}")
-                print(f"Idade: {cliente[5]}")
+                print(f"ID: {c[0]}")
+                print(f"Nome: {c[1]}")
+                print(f"Telefone: {c[2]}")
+                print(f"Email: {c[3]}")
+                print(f"Idade: {c[4]}")
+                print(f"Cidade: {c[5]}")
+                print(f"Torce Flamengo: {c[6]}")
+                print(f"Assiste One Piece: {c[7]}")
             else:
                 print("⚠️ Cliente não encontrado.")
         except Exception as e:
             print("❌ Erro ao exibir cliente:", e)
 
-    def pesquisar_por_nome(self, nome):
+    def alterar(self, id_cliente, nome, telefone, email, idade, cidade, torce_flamengo, assiste_one_piece):
         try:
-            sql = "SELECT * FROM clientes WHERE nome ILIKE %s"
-            self.cursor.execute(sql, (f"%{nome}%",))
-            clientes = self.cursor.fetchall()
-            if clientes:
-                print("\n=== RESULTADOS DA PESQUISA ===")
-                for cliente in clientes:
-                    print(f"ID: {cliente[0]} | Nome: {cliente[1]} | Telefone: {cliente[2]} | Email: {cliente[3]} | Idade: {cliente[5]}")
-            else:
-                print("⚠️ Nenhum cliente encontrado com esse nome.")
-        except Exception as e:
-            print("❌ Erro ao pesquisar cliente:", e)
-
-    def alterar(self, id_cliente, nome, telefone, email, idade):
-        try:
-            sql = "UPDATE clientes SET nome = %s, telefone = %s, email = %s, idade = %s WHERE id = %s"
-            self.cursor.execute(sql, (nome, telefone, email, idade, id_cliente))
+            sql = """
+                UPDATE clientes 
+                SET nome = %s, telefone = %s, email = %s, idade = %s, cidade = %s, torce_flamengo = %s, assiste_one_piece = %s
+                WHERE id = %s
+            """
+            self.cursor.execute(sql, (nome, telefone, email, idade, cidade, torce_flamengo, assiste_one_piece, id_cliente))
             self.conn.commit()
             if self.cursor.rowcount > 0:
                 print("✅ Cliente alterado com sucesso!")
@@ -69,6 +66,16 @@ class CrudCliente:
                 print("⚠️ Cliente não encontrado.")
         except Exception as e:
             print("❌ Erro ao alterar cliente:", e)
+
+    def relatorio(self):
+        try:
+            self.cursor.execute("SELECT COUNT(*), AVG(idade) FROM clientes")
+            total, idade_media = self.cursor.fetchone()
+            print(f"\n📊 TOTAL DE CLIENTES: {total}")
+            print(f"Média de idade: {idade_media:.2f}" if idade_media else "Média de idade: N/A")
+            self.listar_todos()
+        except Exception as e:
+            print("❌ Erro ao gerar relatório de clientes:", e)
 
     def remover(self, id_cliente):
         try:
@@ -81,24 +88,6 @@ class CrudCliente:
                 print("⚠️ Cliente não encontrado.")
         except Exception as e:
             print("❌ Erro ao remover cliente:", e)
-
-    def relatorio(self):
-        try:
-            #total de clientes e idade média
-            self.cursor.execute("SELECT COUNT(*), AVG(idade) FROM clientes")
-            total, idade_media = self.cursor.fetchone()
-            
-            #número total de clientes
-            print(f"\n📊 TOTAL DE CLIENTES CADASTRADOS: {total}")
-            
-            # Relatório idade média
-            print("\n=== RELATÓRIO DE CLIENTES ===")
-            print(f"Média de idade: {idade_media:.2f}" if idade_media else "Média de idade: N/A")
-            
-            # Lista todos os clientes
-            self.listar_todos()
-        except Exception as e:
-            print("❌ Erro ao gerar relatório de clientes:", e)
 
     def __del__(self):
         if self.conn:

@@ -5,10 +5,13 @@ class CrudProduto:
         self.conn = conectar()
         self.cursor = self.conn.cursor()
 
-    def inserir(self, nome, preco, quantidade):
+    def inserir(self, nome, preco, quantidade, tipo=None, origem_cidade=None):
         try:
-            sql = "INSERT INTO produtos (nome, preco, quantidade) VALUES (%s, %s, %s)"
-            self.cursor.execute(sql, (nome, preco, quantidade))
+            sql = """
+                INSERT INTO produtos (nome, preco, quantidade, tipo, origem_cidade)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            self.cursor.execute(sql, (nome, preco, quantidade, tipo, origem_cidade))
             self.conn.commit()
             print("✅ Produto inserido com sucesso!")
         except Exception as e:
@@ -16,12 +19,13 @@ class CrudProduto:
 
     def listar_todos(self):
         try:
-            self.cursor.execute("SELECT * FROM produtos ORDER BY id")
+            sql = "SELECT id, nome, preco, quantidade, data_cadastro, tipo, origem_cidade FROM produtos ORDER BY id"
+            self.cursor.execute(sql)
             produtos = self.cursor.fetchall()
             if produtos:
                 print("\n=== LISTA DE PRODUTOS ===")
                 for p in produtos:
-                    print(f"ID: {p[0]} | Nome: {p[1]} | Preço: R$ {p[2]:.2f} | Quantidade: {p[3]} | Data cadastro: {p[4]}")
+                    print(f"ID: {p[0]} | Nome: {p[1]} | Preço: R$ {p[2]:.2f} | Qtde: {p[3]} | Data: {p[4]} | Tipo: {p[5]} | Origem: {p[6]}")
             else:
                 print("⚠️ Nenhum produto cadastrado.")
         except Exception as e:
@@ -29,10 +33,12 @@ class CrudProduto:
 
     def exibir_um(self, id_produto):
         try:
-            self.cursor.execute("SELECT * FROM produtos WHERE id = %s", (id_produto,))
+            sql = "SELECT id, nome, preco, quantidade, data_cadastro, tipo, origem_cidade FROM produtos WHERE id = %s"
+            self.cursor.execute(sql, (id_produto,))
             p = self.cursor.fetchone()
             if p:
-                print(f"\nID: {p[0]} | Nome: {p[1]} | Preço: R$ {p[2]:.2f} | Quantidade: {p[3]} | Data cadastro: {p[4]}")
+                print("\n=== DADOS DO PRODUTO ===")
+                print(f"ID: {p[0]} | Nome: {p[1]} | Preço: R$ {p[2]:.2f} | Qtde: {p[3]} | Data: {p[4]} | Tipo: {p[5]} | Origem: {p[6]}")
             else:
                 print("⚠️ Produto não encontrado.")
         except Exception as e:
@@ -40,21 +46,26 @@ class CrudProduto:
 
     def pesquisar_por_nome(self, nome):
         try:
-            self.cursor.execute("SELECT * FROM produtos WHERE nome ILIKE %s", (f"%{nome}%",))
+            sql = "SELECT id, nome, preco, quantidade, tipo, origem_cidade FROM produtos WHERE nome ILIKE %s"
+            self.cursor.execute(sql, (f"%{nome}%",))
             produtos = self.cursor.fetchall()
             if produtos:
                 print("\n=== RESULTADOS DA PESQUISA ===")
                 for p in produtos:
-                    print(f"ID: {p[0]} | Nome: {p[1]} | Preço: R$ {p[2]:.2f} | Quantidade: {p[3]}")
+                    print(f"ID: {p[0]} | Nome: {p[1]} | Preço: R$ {p[2]:.2f} | Qtde: {p[3]} | Tipo: {p[4]} | Origem: {p[5]}")
             else:
                 print("⚠️ Nenhum produto encontrado.")
         except Exception as e:
             print("❌ Erro ao pesquisar produto:", e)
 
-    def alterar(self, id_produto, nome, preco, quantidade):
+    def alterar(self, id_produto, nome, preco, quantidade, tipo=None, origem_cidade=None):
         try:
-            sql = "UPDATE produtos SET nome=%s, preco=%s, quantidade=%s WHERE id=%s"
-            self.cursor.execute(sql, (nome, preco, quantidade, id_produto))
+            sql = """
+                UPDATE produtos
+                SET nome=%s, preco=%s, quantidade=%s, tipo=%s, origem_cidade=%s
+                WHERE id=%s
+            """
+            self.cursor.execute(sql, (nome, preco, quantidade, tipo, origem_cidade, id_produto))
             self.conn.commit()
             if self.cursor.rowcount > 0:
                 print("✅ Produto alterado com sucesso!")
@@ -65,7 +76,8 @@ class CrudProduto:
 
     def remover(self, id_produto):
         try:
-            self.cursor.execute("DELETE FROM produtos WHERE id=%s", (id_produto,))
+            sql = "DELETE FROM produtos WHERE id=%s"
+            self.cursor.execute(sql, (id_produto,))
             self.conn.commit()
             if self.cursor.rowcount > 0:
                 print("✅ Produto removido com sucesso!")
@@ -76,29 +88,29 @@ class CrudProduto:
 
     def relatorio(self):
         try:
-            #total de produtos
+            # total de produtos
             self.cursor.execute("SELECT COUNT(*) FROM produtos")
-            total_produtos = self.cursor.fetchone()[0]
-            print(f"\n📊 TOTAL DE PRODUTOS CADASTRADOS: {total_produtos}")
+            total = self.cursor.fetchone()[0]
+            print(f"\n📊 TOTAL DE PRODUTOS: {total}")
 
-            #menor estoque
+            # menor estoque
             self.cursor.execute("SELECT nome, quantidade FROM produtos ORDER BY quantidade ASC LIMIT 1")
-            menor_estoque = self.cursor.fetchone()
-            if menor_estoque:
-                print(f"📉 Produto com menor estoque: {menor_estoque[0]} ({menor_estoque[1]} unidades)")
+            menor = self.cursor.fetchone()
+            if menor:
+                print(f"📉 Menor estoque: {menor[0]} ({menor[1]} unidades)")
 
-            #maior estoque
+            # maior estoque
             self.cursor.execute("SELECT nome, quantidade FROM produtos ORDER BY quantidade DESC LIMIT 1")
-            maior_estoque = self.cursor.fetchone()
-            if maior_estoque:
-                print(f"🔝 Produto com maior estoque: {maior_estoque[0]} ({maior_estoque[1]} unidades)")
+            maior = self.cursor.fetchone()
+            if maior:
+                print(f"🔝 Maior estoque: {maior[0]} ({maior[1]} unidades)")
 
-            #Valor total do estoque da loja
+            # valor total em estoque
             self.cursor.execute("SELECT SUM(preco * quantidade) FROM produtos")
-            valor_total_estoque = self.cursor.fetchone()[0]
-            print(f"💰 Valor total do estoque da loja: R$ {valor_total_estoque:.2f}" if valor_total_estoque else "💰 Valor total do estoque da loja: R$ 0,00")
+            valor = self.cursor.fetchone()[0]
+            print(f"💰 Valor total em estoque: R$ {valor:.2f}" if valor else "💰 Valor total em estoque: R$ 0,00")
 
-            #Lista todos os produtos
+            # lista todos
             self.listar_todos()
         except Exception as e:
             print("❌ Erro ao gerar relatório de produtos:", e)
